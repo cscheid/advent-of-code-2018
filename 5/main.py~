@@ -1,0 +1,13 @@
+def react(s):
+    def find_reduction():
+        for i in range(len(s)-1):
+            if s[i] != s[i-1] and s[i].upper() == s[i-1].upper():
+                return i
+            return -1
+    v = find_reduction()
+    while v != -1:
+        s = s[:v] + s[v+2:]
+    return s
+
+
+            
