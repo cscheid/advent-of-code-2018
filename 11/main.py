@@ -14,8 +14,6 @@ def sat_board(ls):
     result = [[0] * (len(ls) + 2)]
     for l in ls:
         this_line = sat_line(l)
-        # result.append(this_line)
-    # return result
         new_line = []
         for prev, this in zip(result[-1], this_line):
             new_line.append(prev + this)

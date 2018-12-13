@@ -30,10 +30,6 @@ def empty_board(w, h):
 def infinity_board(w, h):
     return constant_board(w, h, infinity)
     
-def write_board(l):
-    (min_x, max_x), (min_y, max_y) = find_bounds(l)
-    return empty_board(max_x - min_x + 2, max_y - min_y + 2)
-
 def board_weights(w, h):
     board = []
     board.append([infinity] * w)
@@ -89,7 +85,7 @@ def add_board(board1, board2):
                 for (la, lb) in zip(board1, board2))
 
 # 6.1
-if __name__ == '__main-6.1__':
+if __name__ == '__main__':
     l = read_points(sys.stdin.readlines())
     print(l)
     bounds = find_bounds(l)
@@ -123,12 +119,4 @@ if __name__ == '__main__':
             if total[y][x] < 10000:
                 count += 1
     print(count)
-    #     # pprint_board(argclosest_board)
-    #     # print()
-    #     return 
-    #     update_board(l1_distance_board(closest_board, p),
-    #                  i,
-    #                  argclosest_board,
-    #                  closest_board)
-    # print(count_regions(closest_board, argclosest_board, l))
     
