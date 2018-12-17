@@ -99,9 +99,6 @@ class Board:
         return [(x, y-1), (x-1, y), (x+1, y), (x, y+1)]
     def move(self, unit, distance_map):
         def open_target_squares():
-            # def min_distance():
-            #     return min(min(v for v in l) for l in distance_map)
-            # d = min_distance()
             result = set()
             for u in self.units:
                 if u[3] == unit[3]:
