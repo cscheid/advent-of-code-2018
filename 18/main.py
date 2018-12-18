@@ -1,3 +1,4 @@
+#!/usr/bin/env pypy3
 # 8:05AM
 #  8:18AM
 #  8:24AM
