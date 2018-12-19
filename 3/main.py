@@ -1,3 +1,6 @@
+#!/usr/bin/env pypy3
+from kitchen_sink import *
+
 import re
 
 r = re.compile(r"#([0-9]+) @ ([0-9]+),([0-9]+): ([0-9]+)x([0-9]+)")
@@ -82,5 +85,6 @@ def process_claims(claims):
         elif this_event[0] == 'delete':
             y_interval = list(v for v in y_interval if v[1] != this_event[1].i)
     return (total_claims, valid_claims.difference(invalid_claims))
-            
+
+print(process_claims(load_all_claims(input_lines())))
 

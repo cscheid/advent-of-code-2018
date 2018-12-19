@@ -1,3 +1,7 @@
+#!/usr/bin/env pypy3
+
+from kitchen_sink import *
+
 import re
 import datetime
 import sys
@@ -26,17 +30,6 @@ def parse_event(line):
     result = r.match(line.strip())
     return Event(*result.groups())
 
-def argmax(d, by=lambda v: v):
-    current_max = None
-    current_key = None
-    for (k, v) in d.items():
-        value = by(v)
-        if current_key is None or value > current_value:
-            current_key = k
-            current_value = value
-            current_max = v
-    return current_key, current_max
-
 def total_sleep(lst):
     return sum(l[1] - l[0] for l in lst)
 
@@ -62,7 +55,7 @@ def process_intervals(lst):
     return argmax_minute, max_minute
     
 if __name__ == '__main__':
-    events = list(parse_event(l) for l in sys.stdin)
+    events = list(parse_event(l) for l in input_lines())
     events.sort(key=lambda l: l.when)
     current_guard = None
     current_state = None

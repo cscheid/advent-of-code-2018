@@ -1,4 +1,9 @@
+#!/usr/bin/env pypy3
+from kitchen_sink import *
+
 d = { 0: 1 }
+l = list(int(l) for l in input_lines())
+
 current = 0
 found = False
 while not found:
