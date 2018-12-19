@@ -139,16 +139,66 @@ class Board:
 # an ugly directed graph, represented as two dict of lists, one for out edges
 # the other for inedges
 
-def edges_to_graph(edges):
-    d = {}
-    d_inv = {}
-    v_set = set()
-    for (f, t) in edges:
-        d.setdefault(f, []).append(t)
-        d_inv.setdefault(t, []).append(f)
-        v_set.add(f)
-        v_set.add(t)
-    for v in v_set:
-        d.setdefault(v, [])
-    return d, d_inv
+class Graph:
+
+    def __init__(self, edges):
+        d = {}
+        d_inv = {}
+        v_set = set()
+        for (f, t) in edges:
+            d.setdefault(f, []).append(t)
+            d_inv.setdefault(t, []).append(f)
+            v_set.add(f)
+            v_set.add(t)
+        for v in v_set:
+            d.setdefault(v, [])
+        self.d = d
+        self.d_inv = d_inv
+
+    def vertices(self):
+        return self.d.keys()
+
+    def in_degree(self, k):
+        return len(self.d_inv.get(k, []))
+
+    def out_degree(self, k):
+        return len(self.d.get(k, []))
+
+    def sources(self):
+        for k in self.d.keys():
+            if self.in_degree(k) == 0:
+                yield k
+                
+    def sinks(self):
+        for k in self.d.keys():
+            if self.out_degree(k) == 0:
+                yield k
+
+    def __contains__(self, k):
+        return k in self.d
+
+    def remove(self, f):
+        for t in self.d[f]:
+            self.d_inv[t].remove(f)
+        del self.d[f]
+
+    def topo_sort(self):
+        d = self.d
+        d_inv = self.d_inv
+        sources = list(k for k in d.keys() if in_degree(d, d_inv, k) == 0)
+        sources.sort(key=lambda k: -ord(k))
+        result = []
+        while len(sources):
+            f = sources.pop()
+            sources = list(v for v in sources if v != f)
+            if f in d:
+                for t in d[f]:
+                    d_inv[t].remove(f)
+                del d[f]
+            result.append(f)
+            sources.extend(list(k for k in d.keys() if in_degree(d, d_inv, k) == 0))
+            sources.sort(key=lambda k: -ord(k))
+        return result
+        print("".join(result))
+        
 
