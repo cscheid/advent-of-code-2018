@@ -1,5 +1,8 @@
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
+
+##############################################################################
+# utils
 
 def argmax(d, by=lambda v: v):
     try:
@@ -50,6 +53,11 @@ def const(x):
     def f(_):
         return x
     return f
+
+def deque_top(d):
+    v = d.popleft()
+    d.appendleft(v)
+    return v
 
 ##############################################################################
 # 2d board stuff, or can i haz APL
@@ -200,5 +208,38 @@ class Graph:
             sources.sort(key=lambda k: -ord(k))
         return result
         print("".join(result))
-        
 
+################################################################################
+# simple n-ary tree
+
+class Tree:
+    def __init__(self, children, metadata):
+        self.children = children
+        self.metadata = metadata
+
+    def pprint(self, i=0):
+        print("%s%s" % (" " * i, self.metadata))
+        for c in self.children:
+            c.pprint(i+2)
+
+################################################################################
+# optimization stuff
+
+def golden_section_minimization(a, b, f, done):
+    gr = (5 ** 0.5 + 1) / 2
+    fa = f(a)
+    fb = f(b)
+    # from wikipedia
+    c = b - (b - a) / gr
+    d = a + (b - a) / gr
+    fc = f(c)
+    fd = f(d)
+    while not done(c, d, fc, fd):
+        if f(c) < f(d):
+            b = d
+        else:
+            a = c
+        # we recompute both c and d here to avoid loss of precision which may lead to incorrect results or infinite loop
+        c = b - (b - a) / gr
+        d = a + (b - a) / gr
+    return (c + d) / 2

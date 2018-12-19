@@ -1,16 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
+
+from kitchen_sink import *
 
 import sys
 
-class Tree:
-    def __init__(self, children, metadata):
-        self.children = children
-        self.metadata = metadata
+class MyTree(Tree):
 
-    def pprint(self, i=0):
-        print("%s%s" % (" " * i, self.metadata))
-        for c in self.children:
-            c.pprint(i+2)
+    def __init__(self, *args):
+        Tree.__init__(self, *args)
 
     def metadata_sum(self):
         this_sum = sum(self.metadata)
@@ -38,12 +35,11 @@ def parse_input(vs):
         children.append(parse_input(vs))
     for i in range(n_metadata):
         metadata.append(next(vs))
-    return Tree(children, metadata)
+    return MyTree(children, metadata)
 
 if __name__ == '__main__':
-    vs = (int(i) for i in sys.stdin.read().split())
+    vs = (int(i) for i in input_lines()[0].split())
     tree = parse_input(vs)
-    tree.pprint()
     print(tree.metadata_sum())
     print(tree.value())
 

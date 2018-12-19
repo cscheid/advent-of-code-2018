@@ -1,25 +1,32 @@
+#!/usr/bin/env python3
+
+from kitchen_sink import *
 import re
 import sys
+import numpy as np
 
 r = re.compile(r'position=< *(-?[0-9]+), *(-?[0-9]+)> velocity=< *(-?[0-9]+), *(-?[0-9]+)>')
 def parse_point(v):
-    return list(int(i) for i in r.match(v).groups())
+    l = list(int(i) for i in r.match(v).groups())
+    p = np.array([l[0], l[1]])
+    v = np.array([l[2], l[3]])
+    return p, v
 
 def state_at(l, t):
-    return list((v[0] + t * v[2], v[1] + t * v[3]) for v in l)
+    return np.array(list(p + t * v for (p, v) in l))
 
 def board_area(l):
-    min_x = min(v[0] for v in l)
-    min_y = min(v[1] for v in l)
-    max_x = max(v[0] for v in l)
-    max_y = max(v[1] for v in l)
+    min_x = l[:,0].min()
+    min_y = l[:,1].min()
+    max_x = l[:,0].max()
+    max_y = l[:,1].max()
     return (max_y - min_y) * (max_x - min_x)
 
 def print_board(l):
-    min_x = min(v[0] for v in l)
-    min_y = min(v[1] for v in l)
-    max_x = max(v[0] for v in l)
-    max_y = max(v[1] for v in l)
+    min_x = l[:,0].min()
+    min_y = l[:,1].min()
+    max_x = l[:,0].max()
+    max_y = l[:,1].max()
     b = []
     for i in range(max_y - min_y + 1):
         b.append(['.'] * (max_x - min_x + 1))
@@ -29,39 +36,34 @@ def print_board(l):
         print("".join(row))
 
 def min_area(l):
-    current_area = board_area(state_at(l, 0))
-    t = 1
-    next_board = state_at(l, t)
-    next_area = board_area(next_board)
-    while next_area < current_area:
-        current_area = next_area
-        t += 1
-        next_board = state_at(l, t)
-        next_area = board_area(next_board)
-        if t % 1000 == 0:
-            print("\r                             \r%s %s" % (t, next_area), end='')
-    print()
-    return t-1
+    def board_area_at(t):
+        return board_area(state_at(l, t))
+    a = 0
+    b = 1000000 # or something else found by hand
+    def done(c, d, fc, fd):
+        return d-c < 0.1
+    r = golden_section_minimization(a, b, board_area_at, done)
+    return round(r)
 
 def min_variation(l):
     n = len(l)
-    a = sum(v[0] * v[2] for v in l)
-    b = sum(v[2] * v[2] for v in l)
-    c = sum(v[0] for v in l)
-    d = sum(v[2] for v in l)
-    e = sum(v[1] * v[3] for v in l)
-    f = sum(v[3] * v[3] for v in l)
-    g = sum(v[1] for v in l)
-    h = sum(v[3] for v in l)
+    a = (l[:,0,0] * l[:,1,0]).sum()
+    b = (l[:,1,0] * l[:,1,0]).sum()
+    c = l[:,0,0].sum()
+    d = l[:,1,0].sum()
+    e = (l[:,0,1] * l[:,1,1]).sum()
+    f = (l[:,1,1] * l[:,1,1]).sum()
+    g = l[:,0,1].sum()
+    h = l[:,1,1].sum()
     v1 = (n * (n-1) * b - n * d * d) + (n * (n-1) * f - n * h * h)
     v2 = (n * (n-1) * a - (n-1) * c * d) + (n * (n-1) * e - (n-1) * g * h)
     return -v2/v1
 
 if __name__ == '__main__':
-    l = list(parse_point(v) for v in sys.stdin.readlines())
+    l = np.array(list(parse_point(v) for v in sys.stdin.readlines()))
     s1 = round(min_variation(l))
-    s2 = min_area(l)
     print(s1)
+    s2 = min_area(l)
     print(s2)
     print_board(state_at(l, 10086))
     
