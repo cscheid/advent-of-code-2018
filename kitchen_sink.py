@@ -46,10 +46,18 @@ def input_lines():
         raise Exception("EMPTY INPUT!")
     return result
 
+def const(x):
+    def f(_):
+        return x
+    return f
+
 ##############################################################################
 # 2d board stuff, or can i haz APL
 #
 # possibly should be called "2d_array", but board makes sense in aoc contexts
+
+def dims_board(v):
+    return (len(v[0]), len(v))
 
 def constant_board(w, h, v):
     board = []
@@ -91,3 +99,8 @@ def sentinel_board(board, sentinel):
     result.append([sentinel] * (w + 2))
     return result
 
+def enumerate_board(board):
+    w, h = dims_board(board)
+    for y in range(h):
+        for x in range(w):
+            yield (x, y)

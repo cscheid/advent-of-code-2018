@@ -21,40 +21,29 @@ def find_bounds(l):
     return (min_x, max_x), (min_y, max_y)
 infinity = 1000000
 
-def infinity_board(w, h):
-    return constant_board(w, h, infinity)
-    
-def board_weights(w, h):
-    return sentinel_board(constant_board(w, h, 1), infinity)
-
 def l1_distance_board(w, h, point):
     return map_board(lambda p: abs(point[0] - p[0]) + abs(point[1] - p[1]),
                      index_board(w, h))
 
 def update_board(distances, index, argclosest, closest):
-    w = len(distances[0])
-    h = len(distances)
-    for x in range(w):
-        for y in range(h):
-            if distances[y][x] < closest[y][x]:
-                argclosest[y][x] = index
-                closest[y][x] = distances[y][x]
+    w, h = dims_board(distances)
+    for x, y in enumerate_board(distances):
+        if distances[y][x] < closest[y][x]:
+            argclosest[y][x] = index
+            closest[y][x] = distances[y][x]
 
 def count_regions(distances, indices, points):
     d = {}
-    w = len(indices[0])
-    h = len(indices)
-    weights = board_weights(w, h)
-    for x in range(w):
-        for y in range(h):
-            i = indices[y][x]
-            count = 0
-            for p in points:
-                dist = abs(p[0] - x) + abs(p[1] - y)
-                if dist == distances[y][x]:
-                    count += 1
-            if count == 1:
-                d[i] = d.get(i, 0) + weights[y][x]
+    weights = sentinel_board(map_board(const(1), indices), infinity)
+    for x, y in enumerate_board(indices):
+        i = indices[y][x]
+        count = 0
+        for p in points:
+            dist = abs(p[0] - x) + abs(p[1] - y)
+            if dist == distances[y][x]:
+                count += 1
+        if count == 1:
+            d[i] = d.get(i, 0) + weights[y][x]
     result = list((chr(k + 65), v) for (k, v) in d.items()
                   if v < infinity)
     result.sort(key=lambda v:-v[1])
