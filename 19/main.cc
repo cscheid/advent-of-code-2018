@@ -11,7 +11,6 @@ int main()
       d = b * f;
       if (d == c) {
         a += b;
-        cout << a << " " << b << endl;
       }
       ++f;
     } while (f <= c);

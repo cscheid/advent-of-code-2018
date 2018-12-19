@@ -3,6 +3,7 @@
 #   8:44
 #   9:58AM
 
+import time
 import sys
 
 f = list(l.strip() for l in sys.stdin.readlines())
@@ -43,42 +44,61 @@ def eqrr(opc, a, b, c, reg):
 def reg_to_var(v):
     return chr(ord('a') + v)
 
-def disassemble_addr(a, b, c):
-    return '%s = %s + %s' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
-def disassemble_addi(a, b, c):
-    return '%s = %s + %s' % (reg_to_var(c), reg_to_var(a), b)
-def disassemble_mulr(a, b, c):
-    return '%s = %s * %s' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
-def disassemble_muli(a, b, c):
-    return '%s = %s * %s' % (reg_to_var(c), reg_to_var(a), b)
-def disassemble_banr(a, b, c):
-    return '%s = %s & %s' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
-def disassemble_bani(a, b, c):
-    return '%s = %s & %s' % (reg_to_var(c), reg_to_var(a), b)
-def disassemble_borr(a, b, c):
-    return '%s = %s | %s' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
-def disassemble_bori(a, b, c):
-    return '%s = %s | %s' % (reg_to_var(c), reg_to_var(a), b)
-def disassemble_setr(a, b, c):
-    return '%s = %s' % (reg_to_var(c), reg_to_var(a))
-def disassemble_seti(a, b, c):
-    return '%s = %s' % (reg_to_var(c), a)
-def disassemble_setr(a, b, c):
-    return '%s = %s' % (reg_to_var(c), reg_to_var(a))
-def disassemble_seti(a, b, c):
-    return '%s = %s' % (reg_to_var(c), a)
-def disassemble_gtir(a, b, c):
-    return '%s = 1 if %s > %s else 0' % (reg_to_var(c), a, reg_to_var(b))
-def disassemble_gtri(a, b, c):
-    return '%s = 1 if %s > %s else 0' % (reg_to_var(c), reg_to_var(a), b)
-def disassemble_gtrr(a, b, c):
-    return '%s = 1 if %s > %s else 0' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
-def disassemble_eqir(a, b, c):
-    return '%s = 1 if %s == %s else 0' % (reg_to_var(c), a, reg_to_var(b))
-def disassemble_eqri(a, b, c):
-    return '%s = 1 if %s == %s else 0' % (reg_to_var(c), reg_to_var(a), b)
-def disassemble_eqrr(a, b, c):
-    return '%s = 1 if %s == %s else 0' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
+def cpp_addr(a, b, c):
+    return '  %s = %s + %s;' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
+def cpp_addi(a, b, c):
+    return '  %s = %s + %s;' % (reg_to_var(c), reg_to_var(a), b)
+def cpp_mulr(a, b, c):
+    return '  %s = %s * %s;' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
+def cpp_muli(a, b, c):
+    return '  %s = %s * %s;' % (reg_to_var(c), reg_to_var(a), b)
+def cpp_banr(a, b, c):
+    return '  %s = %s & %s;' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
+def cpp_bani(a, b, c):
+    return '  %s = %s & %s;' % (reg_to_var(c), reg_to_var(a), b)
+def cpp_borr(a, b, c):
+    return '  %s = %s | %s;' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
+def cpp_bori(a, b, c):
+    return '  %s = %s | %s;' % (reg_to_var(c), reg_to_var(a), b)
+def cpp_setr(a, b, c):
+    return '  %s = %s;' % (reg_to_var(c), reg_to_var(a))
+def cpp_seti(a, b, c):
+    return '  %s = %s;' % (reg_to_var(c), a)
+def cpp_setr(a, b, c):
+    return '  %s = %s;' % (reg_to_var(c), reg_to_var(a))
+def cpp_seti(a, b, c):
+    return '  %s = %s;' % (reg_to_var(c), a)
+def cpp_gtir(a, b, c):
+    return '  %s = %s > %s;' % (reg_to_var(c), a, reg_to_var(b))
+def cpp_gtri(a, b, c):
+    return '  %s = %s > %s;' % (reg_to_var(c), reg_to_var(a), b)
+def cpp_gtrr(a, b, c):
+    return '  %s = %s > %s;' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
+def cpp_eqir(a, b, c):
+    return '  %s = %s == %s;' % (reg_to_var(c), a, reg_to_var(b))
+def cpp_eqri(a, b, c):
+    return '  %s = %s == %s;' % (reg_to_var(c), reg_to_var(a), b)
+def cpp_eqrr(a, b, c):
+    return '  %s = %s == %s;' % (reg_to_var(c), reg_to_var(a), reg_to_var(b))
+
+cpp_opcodes = {
+    "eqir": cpp_eqir,
+    "gtrr": cpp_gtrr,
+    "gtri": cpp_gtri,
+    "eqri": cpp_eqri,
+    "eqrr": cpp_eqrr,
+    "gtir": cpp_gtir,
+    "setr": cpp_setr,
+    "banr": cpp_banr,
+    "bani": cpp_bani,
+    "seti": cpp_seti,
+    "borr": cpp_borr,
+    "mulr": cpp_mulr,
+    "addr": cpp_addr,
+    "muli": cpp_muli,
+    "addi": cpp_addi,
+    "bori": cpp_bori
+    } 
 
 opcodes = {
     "eqir": eqir,
@@ -99,36 +119,47 @@ opcodes = {
     "bori": bori
     } 
 
-dis_opcodes = {
-    "eqir": disassemble_eqir,
-    "gtrr": disassemble_gtrr,
-    "gtri": disassemble_gtri,
-    "eqri": disassemble_eqri,
-    "eqrr": disassemble_eqrr,
-    "gtir": disassemble_gtir,
-    "setr": disassemble_setr,
-    "banr": disassemble_banr,
-    "bani": disassemble_bani,
-    "seti": disassemble_seti,
-    "borr": disassemble_borr,
-    "mulr": disassemble_mulr,
-    "addr": disassemble_addr,
-    "muli": disassemble_muli,
-    "addi": disassemble_addi,
-    "bori": disassemble_bori
-    } 
 
-
-state = [1,0,0,0,0,0] # 0] * 6
 instructions = []
-print(f[0])
 ip = int(f[0].split()[1])
-print("# IP: %s" % reg_to_var(ip))
-for i,l in enumerate(f[1:]):
-    l = l.split()
-    print("%2d: %s" % (i, dis_opcodes[l[0]](int(l[1]), int(l[2]), int(l[3]))))
-    instructions.append((l[0], int(l[1]), int(l[2]), int(l[3])))
 
+try:
+    cmd = sys.argv[1]
+except IndexError:
+    cmd = 'run'
+
+if cmd == 'compile':
+    print("// IP: %s" % reg_to_var(ip))
+    print(open("preamble.cc").read())
+    print ("  static const void* instructions[] = {")
+    for i in range(len(f[1:])):
+        print("    &&l%d" % i, end='')
+        if i != len(instructions)-1:
+            print(",")
+        else:
+            print()
+    print("  };");
+    print("  n_instructions = %d;" % len(f[1:]))
+
+    for i,l in enumerate(f[1:]):
+        l = l.split()
+        print("l%d: %s" % (i, cpp_opcodes[l[0]](int(l[1]), int(l[2]), int(l[3]))))
+        print("  goto done;")
+        instructions.append((l[0], int(l[1]), int(l[2]), int(l[3])))
+    print(open("postamble.cc").read())
+    exit(0)
+elif cmd == 'disassemble':
+    for i,l in enumerate(f[1:]):
+        l = l.split()
+        print("%3d: %s" % (i, cpp_opcodes[l[0]](int(l[1]), int(l[2]), int(l[3]))))
+    exit(0)
+else:
+    print("will run!")
+    for i,l in enumerate(f[1:]):
+        l = l.split()
+        instructions.append((l[0], int(l[1]), int(l[2]), int(l[3])))
+
+state = [0,0,0,0,0,0]
 def run():
     ticks = 0
     changed = False
@@ -136,28 +167,9 @@ def run():
         for i in range(1000000):
             if state[ip] >= len(instructions):
                 return
-            if state[ip] == 1:
-                print(state)
-                exit(1)
             ci = instructions[state[ip]]
-            old_state_1 = state[1]
             opcodes[ci[0]](0, ci[1], ci[2], ci[3], state)
-            if state[1] != old_state_1 and not changed:
-                print("Changed!", ci, old_state_1, state)
-                # state[1] = 10551373
-                changed = True
-                
-                # d1 = state[1] - old_state_1
-                # exit(1)
-            # if state[5] == 9999:
-            #     state[5] = 10551375
-            #     # state[1] = 10551364 # state[2] - 12 + 1# 2 * state[4]
             state[ip] += 1
-            ticks += 1
-        print(ci, state, ticks)
-        # YOLOOOO
-        # state[2] = 10000
-        # print(ci, state)
 
 run()
 print(state)

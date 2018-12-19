@@ -1,3 +1,8 @@
+This is a log of my reverse-engineering adventures with problem 19.
+
+--------------------------------------------------------------------------------
+# this used my old version of the disassembler that doesn't look like c++
+
 IP: e
 addi 4 16 4    0: e = e + 16
 seti 1 8 1     1: b = 1
@@ -88,7 +93,6 @@ seti 0 7 4    35: e = 0
   c = c + d
   a = 0
   goto 1
-
 
 --------------------------------------------------------------------------------
 
@@ -191,8 +195,7 @@ while b <= c
 
 --------------------------------------------------------------------------------
 
-# notice the bug i introduced here..
-for (b=0; b<=c; ++b) {
+for (; b<=c; ++b) {
   for (f=1; f<=c; ++f) {
     if (b * f == c)
        a += b;
@@ -201,7 +204,8 @@ for (b=0; b<=c; ++b) {
 
 --------------------------------------------------------------------------------
 
-for (b=0; b<=c; ++b) {
+# notice the change in the loop variable
+for (b=1; b<=c; ++b) {
   if (c % b == 0)
     a += c / b;
 }
