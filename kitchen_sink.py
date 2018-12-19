@@ -45,3 +45,49 @@ def input_lines():
     if len(result) == 0:
         raise Exception("EMPTY INPUT!")
     return result
+
+##############################################################################
+# 2d board stuff, or can i haz APL
+#
+# possibly should be called "2d_array", but board makes sense in aoc contexts
+
+def constant_board(w, h, v):
+    board = []
+    for _ in range(h):
+        board.append([v] * w)
+    return board
+
+def empty_board(w, h):
+    return constant_board(w, h, 0)
+
+def pprint_board(board):
+    for l in board:
+        for v in l:
+            print("% 3d " % v, end='')
+        print()
+
+def add_board(board1, board2):
+    return map_board(lambda a, b: a + b, board1, board2)
+
+def map_board(f, *boards): # board1, board2):
+    return list(list(f(*args) for args in zip(*largs))
+                for largs in zip(*boards))
+
+def index_board(w, h):
+    board = []
+    for y in range(h):
+        line = []
+        for x in range(w):
+            line.append((x, y))
+        board.append(line)
+    return board
+
+def sentinel_board(board, sentinel):
+    w = len(board[0])
+    result = []
+    result.append([sentinel] * (w + 2))
+    for l in board:
+        result.append([sentinel] + l + [sentinel])
+    result.append([sentinel] * (w + 2))
+    return result
+

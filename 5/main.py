@@ -1,3 +1,5 @@
+#!/usr/bin/env pypy3
+
 # mega-carp solution
 
 def react(s):
@@ -31,6 +33,7 @@ def react2(foo):
         c = chr(i)
         v = (c, len(react(foo.replace(c, '').replace(c.lower(), ''))))
         lst.append(v)
+        print("ping.")
     lst.sort(key=lambda key: key[1])
     return lst[0]
 
