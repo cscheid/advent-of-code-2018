@@ -22,20 +22,19 @@ def find_bounds(l):
 infinity = 1000000
 
 def l1_distance_board(w, h, point):
-    return map_board(lambda p: abs(point[0] - p[0]) + abs(point[1] - p[1]),
-                     index_board(w, h))
+    return Board.index(w,h).map(lambda p: abs(point[0] - p[0]) + abs(point[1] - p[1]))
 
 def update_board(distances, index, argclosest, closest):
-    w, h = dims_board(distances)
-    for x, y in enumerate_board(distances):
+    w, h = distances.dims()
+    for x, y in distances.keys():
         if distances[y][x] < closest[y][x]:
             argclosest[y][x] = index
             closest[y][x] = distances[y][x]
 
 def count_regions(distances, indices, points):
     d = {}
-    weights = sentinel_board(map_board(const(1), indices), infinity)
-    for x, y in enumerate_board(indices):
+    weights = indices.map(const(1)).sentinel(infinity)
+    for x, y in distances.keys():
         i = indices[y][x]
         count = 0
         for p in points:
@@ -57,8 +56,8 @@ if __name__ == '__main__':
         w = bounds[0][1] - bounds[0][0] + 2
         h = bounds[1][1] - bounds[1][0] + 2
         l = center(l, bounds)
-        argclosest_board = constant_board(w, h, -1)
-        closest_board = constant_board(w, h, infinity)
+        argclosest_board = Board.constant(w, h, -1)
+        closest_board = Board.constant(w, h, infinity)
         for i, p in enumerate(l):
             update_board(l1_distance_board(w, h, p),
                          i,
@@ -71,14 +70,13 @@ if __name__ == '__main__':
         w = bounds[0][1] - bounds[0][0] + 2
         h = bounds[1][1] - bounds[1][0] + 2
         l = center(l, bounds)
-        total = empty_board(w, h)
+        total = Board.empty(w, h)
         for i, p in enumerate(l):
             d = l1_distance_board(w, h, p)
-            total = add_board(d, total)
+            total = d + total
         count = 0
-        for x in range(w):
-            for y in range(h):
-                if total[y][x] < 10000:
-                    count += 1
+        total
+        for v in total.values():
+            if v < 10000:
+                count += 1
         print(count)
-    
