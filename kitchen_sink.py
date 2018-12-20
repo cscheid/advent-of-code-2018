@@ -137,7 +137,6 @@ class Board:
                 yield (x, y)
 
     def values(self):
-        w, h = self.dims()
         for l in self.v:
             yield from l
 
