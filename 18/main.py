@@ -15,23 +15,20 @@ def step(board):
     w, h = board.dims()
 
     def decide_board(x, y, c):
-        new_c = c
         if c == '.':
             trees = isize(filter(istree, board.adjacent8(x, y)))
             if trees >= 3:
-                new_c = '|'
+                return '|'
         elif c == '|':
             trees = isize(filter(islumberyard, board.adjacent8(x, y)))
             if trees >= 3:
-                new_c = '#'
+                return '#'
         elif c == '#':
             trees = isize(filter(islumberyard, board.adjacent8(x, y)))
             lumbs = isize(filter(istree, board.adjacent8(x, y)))
             if trees < 1 or lumbs < 1:
-                new_c = '.'
-        else:
-            new_c = c
-        return new_c
+                return '.'
+        return c
     
     return board.map(decide_board)
 
