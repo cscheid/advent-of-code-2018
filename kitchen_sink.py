@@ -54,6 +54,9 @@ def input_lines():
         raise Exception("EMPTY INPUT!")
     return result
 
+def input_board():
+    return Board(list(list(c for c in l.strip()) for l in sys.stdin.readlines()))
+
 def const(x):
     def f(*args):
         return x

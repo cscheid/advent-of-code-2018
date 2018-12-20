@@ -6,35 +6,27 @@
 import sys
 from kitchen_sink import *
 
-f = Board(list(list(c for c in l.strip()) for l in sys.stdin.readlines())).sentinel('X')
+f = input_board().sentinel('X')
 
 def istree(c): return c == '|'
 def islumberyard(c): return c == '#'
 
 def step(board):
-    w, h = board.dims()
-
     def decide_board(x, y, c):
-        if c == '.':
-            trees = isize(filter(istree, board.adjacent8(x, y)))
-            if trees >= 3:
-                return '|'
-        elif c == '|':
-            trees = isize(filter(islumberyard, board.adjacent8(x, y)))
-            if trees >= 3:
-                return '#'
-        elif c == '#':
-            trees = isize(filter(islumberyard, board.adjacent8(x, y)))
-            lumbs = isize(filter(istree, board.adjacent8(x, y)))
-            if trees < 1 or lumbs < 1:
-                return '.'
-        return c
-    
+        if   c == '.' and  isize(filter(istree,       board.adjacent8(x, y))) >= 3:
+            return '|'
+        elif c == '|' and  isize(filter(islumberyard, board.adjacent8(x, y))) >= 3:
+            return '#'
+        elif c == '#' and (isize(filter(islumberyard, board.adjacent8(x, y))) < 1 or 
+                           isize(filter(istree,       board.adjacent8(x, y))) < 1):
+            return '.'
+        else:
+            return c
     return board.map(decide_board)
 
 def value(board):
-    trees = isize(filter(lambda p: p == '|', board.values()))
-    lumbs = isize(filter(lambda p: p == '#', board.values()))
+    trees = isize(filter(istree,       board.values()))
+    lumbs = isize(filter(islumberyard, board.values()))
     return (trees, lumbs, trees * lumbs)
 
 # 1496: 
