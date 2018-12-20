@@ -2,9 +2,9 @@
 # 10:35
 #   14:50
 #   14:52
-import sys
 
-f = sys.stdin.readlines()
+from kitchen_sink import *
+import sys
 
 def parse_line(l):
     l = l.strip().split(', ')
@@ -51,16 +51,13 @@ def find_bounds(lines):
     return ((min_x-1, min_y), (max_x+1, max_y))
 
 total_water = 0
-class Board:
+class WaterBoard:
     def __init__(self, lines):
         bounds = find_bounds(lines)
         ((min_x, min_y), (max_x, max_y)) = bounds
         print("bounds: ", ((min_x, min_y), (max_x, max_y)))
         self.bounds = bounds
-        board = []
-        for y in range(min_y, max_y+1):
-            board.append(["."] * (max_x - min_x + 1))
-        self.board = board
+        self.board = Board.constant(max_x - min_x + 1, max_y - min_y+1, '.')
         for ((lmnx, lmny), (lmxx, lmxy)) in lines:
             lmnx -= min_x
             lmny -= min_y
@@ -73,24 +70,15 @@ class Board:
         self.spring_location = spring_location
         self.board[spring_location[1]][spring_location[0]] = '+'
     def pprint(self):
-        for y in self.board:
-            print("".join(y))
-    def enumerate_squares(self):
-        for y in range(len(self.board)):
-            for x in range(len(self.board[0])):
-                yield (x, y)
+        self.board.pprint_char()
     def enumerate_range(self, min_point, max_point):
         for y in range(min_point[1], max_point[1]+1):
             for x in range(min_point[0], max_point[0]+1):
                 yield x, y
     def find_water(self):
-        for (x, y) in self.enumerate_squares():
-            if self.board[y][x] in ['|', '~']:
-                yield (x, y)
+        yield from filter(lambda p: p[2] in '|~', self.board.items())
     def find_static_water(self):
-        for (x, y) in self.enumerate_squares():
-            if self.board[y][x] in ['~']:
-                yield (x, y)
+        yield from filter(lambda p: p[2] == '~', self.board.items())
     def set_square_at(self, p, v):
         self.board[p[1]][p[0]] = v
     def square_at(self, p):
@@ -171,8 +159,8 @@ class Board:
         while len(self.open_squares):
             self.handle_square(self.open_squares.pop())
         
-lines = list(parse_line(l) for l in f)
-board = Board(lines)
+lines = list(parse_line(l) for l in input_lines())
+board = WaterBoard(lines)
 d = 0
 board.run()
 board.pprint()

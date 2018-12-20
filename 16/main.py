@@ -1,7 +1,10 @@
+#!/usr/bin/env pypy3
+
 # 7:33PM
 #   7:52PM
 #   8:09PM
 
+from kitchen_sink import *
 import sys
 
 def addr(opc, a, b, c, reg):
@@ -85,7 +88,7 @@ def check_inst(inst_f, bef, inst_code, after):
         return True
     return False
 
-f = (l for l in sys.stdin.readlines())
+f = (l for l in input_lines())
 
 ##############################################################################
 
@@ -103,7 +106,6 @@ try:
             l3 = next(f).strip()
             state_after = l3[:-1].split(',')
             state_after = [int(state_after[0][-1])] + [int(i) for i in state_after[1:]]
-            next(f)
             print(possible_instructions[inst[0]])
             possible_instructions[inst[0]] = list(
                 inst_f for inst_f in possible_instructions[inst[0]] if check_inst(inst_f, state_before, inst, state_after))

@@ -22,7 +22,7 @@ def find_bounds(l):
 infinity = 1000000
 
 def l1_distance_board(w, h, point):
-    return Board.index(w,h).map(lambda p: abs(point[0] - p[0]) + abs(point[1] - p[1]))
+    return Board.index(w,h).map(lambda x, y, p: abs(point[0] - p[0]) + abs(point[1] - p[1]))
 
 def update_board(distances, index, argclosest, closest):
     w, h = distances.dims()

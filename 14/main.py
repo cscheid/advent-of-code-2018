@@ -27,19 +27,5 @@ while True:
         exit(1)
     if improvements % 1000000 == 0:
         print("\r                                \r%d \t%s \t%s" % (improvements, elf1, elf2), end='')
-print()
-print(len(board)-6)
-
-# i = 0
-# while True:
-#     x = board[i]
-#     if x == 9:
-#         break
-#     i += 1
-
-# a = 
-
-# for 
-# print("".join(str(i) for i in board[n:n+10]))
 
     

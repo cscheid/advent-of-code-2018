@@ -1,5 +1,6 @@
 import sys
 from collections import defaultdict, deque
+from itertools import permutations, tee
 
 ##############################################################################
 # utils
@@ -32,16 +33,20 @@ def group_by_count(w):
         inv.setdefault(v, []).append(k)
     return inv
 
-def permutations(lst):
-    if len(lst) == 0:
-        yield []
-    for i in range(len(lst)):
-        rest = lst[:i] + lst[i+1:]
-        for p in permutations(rest):
-            yield [lst[i]] + p
+def isize(iterable):
+    # annoying that this
+    result = 0
+    for _ in iterable:
+        result += 1
+    return result
+    # is slower than
+    # return len(list(iterable))
 
-def pairs(lst):
-    return zip(lst, lst[1:])
+# from https://docs.python.org/3/library/itertools.html
+def pairs(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 def input_lines():
     result = list(l.strip('\n') for l in sys.stdin if l.strip('\n') != '')
@@ -50,7 +55,7 @@ def input_lines():
     return result
 
 def const(x):
-    def f(_):
+    def f(*args):
         return x
     return f
 
@@ -85,17 +90,22 @@ class Board:
     def empty(w, h):
         return Board.constant(w, h, 0)
 
+    def pprint_char(self):
+        board = self.v
+        for l in board:
+            print("".join(l))
+
     def pprint(self):
         board = self.v
         for l in board:
             for v in l:
-                print("% 3s " % (v,), end='')
+                print("%3s " % (v,), end='')
             print()
 
     def map(self, f, *others): # board1, board2):
         boards = list(b.v for b in (self,) + others)
-        return Board(list(list(f(*args) for args in zip(*largs))
-                          for largs in zip(*boards)))
+        return Board(list(list(f(x, y, *args) for x, args in enumerate(zip(*largs)))
+                          for y, largs in enumerate(zip(*boards))))
 
     @staticmethod
     def index(w, h):
@@ -115,7 +125,7 @@ class Board:
         for l in board:
             result.append([sentinel] + l + [sentinel])
         result.append([sentinel] * (w + 2))
-        return result
+        return Board(result)
 
     def keys(self):
         w, h = self.dims()
@@ -135,13 +145,83 @@ class Board:
                 yield (x, y, self.v[y][x])
 
     def __add__(self, other):
-        return self.map(lambda a, b: a + b, other)
+        return self.map(lambda x, y, a, b: a + b, other)
 
     def __sub__(self, other):
-        return self.map(lambda a, b: a - b, other)
+        return self.map(lambda x, y, a, b: a - b, other)
 
     def __getitem__(self, y):
         return self.v[y]
+
+    def clone(self):
+        return Board(list(list(c for c in l) for l in self.v))
+    
+    ##########################################################################
+
+    # Summed Area Table, fast square sum goodness
+    def sat(self):
+        def sat_line(l):
+            result = [0]
+            for i in l:
+                result.append(result[-1] + i)
+            result.append(result[-1])
+            return result
+        ls = self.v
+        result = [[0] * (len(ls) + 2)]
+        for l in ls:
+            this_line = sat_line(l)
+            new_line = []
+            for prev, this in zip(result[-1], this_line):
+                new_line.append(prev + this)
+            result.append(new_line)
+        result.append(result[-1][:])
+        return Board(result)
+
+    # BFS shortest-path
+    def shortest_path_from(self, x, y, empty_square, infinity=100000):
+        from sortedcontainers import SortedSet
+        distance_map = self.map(const(infinity))
+        distance_map[y][x] = 0
+        pqueue = SortedSet()
+        
+        if empty_square(self[y-1][x]):
+            pqueue.add((1, y-1, x))
+            distance_map[y-1][x] = 1
+        if empty_square(self[y+1][x]):
+            pqueue.add((1, y+1, x))
+            distance_map[y+1][x] = 1
+        if empty_square(self[y][x-1]):
+            pqueue.add((1, y, x-1))
+            distance_map[y][x-1] = 1
+        if empty_square(self[y][x+1]):
+            pqueue.add((1, y, x+1))
+            distance_map[y][x+1] = 1
+
+        while len(pqueue) > 0:
+            d, ty, tx = pqueue.pop(0)
+            if d > distance_map[ty][tx]:
+                continue
+            if empty_square(self[ty-1][tx]) and distance_map[ty-1][tx] > d + 1:
+                pqueue.add((d+1, ty-1, tx))
+                distance_map[ty-1][tx] = d+1
+            if empty_square(self[ty][tx-1]) and distance_map[ty][tx-1] > d + 1:
+                pqueue.add((d+1, ty, tx-1))
+                distance_map[ty][tx-1] = d+1
+            if empty_square(self[ty][tx+1]) and distance_map[ty][tx+1] > d + 1:
+                pqueue.add((d+1, ty, tx+1))
+                distance_map[ty][tx+1] = d+1
+            if empty_square(self[ty+1][tx]) and distance_map[ty+1][tx] > d + 1:
+                pqueue.add((d+1, ty+1, tx))
+                distance_map[ty+1][tx] = d+1
+            
+        return distance_map
+
+    def adjacent8(self, x, y):
+        for i in range(y-1, y+2):
+            for j in range(x-1, x+2):
+                if i == y and j == x:
+                    continue
+                yield self.v[i][j]
     
 ##############################################################################
 # an ugly directed graph, represented as two dict of lists, one for out edges
